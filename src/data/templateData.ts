@@ -172,7 +172,7 @@ export const templates = [
       <p>{{timeline}}</p>
       
       <h2>INVESTMENT</h2>
-      <p>The total cost for this project is ${{total_cost}}.</p>
+      <p>The total cost for this project is ${{total_cost}}</p>
       
       <h2>ACCEPTANCE</h2>
       <p>By signing below, the Client agrees to the terms and conditions outlined in this proposal.</p>
@@ -211,10 +211,10 @@ export const templates = [
           { id: 'amount', label: 'Amount', type: 'number' },
         ],
       },
-      { id: 'subtotal', label: 'Subtotal', type: 'number', required: true },
+      { id: 'subtotal', label: 'Subtotal', type: 'number', required: false },
       { id: 'tax_rate', label: 'Tax Rate (%)', type: 'number', required: true },
-      { id: 'tax_amount', label: 'Tax Amount', type: 'number', required: true },
-      { id: 'total', label: 'Total', type: 'number', required: true },
+      { id: 'tax_amount', label: 'Tax Amount', type: 'number', required: false },
+      { id: 'total', label: 'Total', type: 'number', required: false },
       { id: 'payment_terms', label: 'Payment Terms', type: 'text', required: true },
       { id: 'payment_instructions', label: 'Payment Instructions', type: 'textarea', required: true },
     ],
@@ -333,7 +333,7 @@ export const templates = [
       {{/each}}
       
       <h2>TOTAL BUDGET</h2>
-      <p>The total marketing budget for this plan is ${{budget}}.</p>
+      <p>The total marketing budget for this plan is ${{budget}}</p>
     `,
   },
   {
