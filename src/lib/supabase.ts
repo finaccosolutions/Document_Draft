@@ -9,6 +9,29 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Helper function to check if user is admin
+export const isUserAdmin = async (user: any): Promise<boolean> => {
+  if (!user) return false;
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+
+    return data?.role === 'admin';
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+};
+
 export type Json =
   | string
   | number
@@ -20,88 +43,30 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      document_categories: {
+      profiles: {
         Row: {
           id: string
-          name: string
-          description: string | null
-          created_at: string
+          full_name: string | null
+          avatar_url: string | null
+          created_at: string | null
+          updated_at: string | null
+          role: string
         }
         Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          created_at?: string
+          id: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          role?: string
         }
         Update: {
           id?: string
-          name?: string
-          description?: string | null
-          created_at?: string
-        }
-      }
-      document_templates: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          category_id: string | null
-          content: string
-          fields: Json
-          created_at: string
-          updated_at: string
-          created_by: string
-          status: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          category_id?: string | null
-          content: string
-          fields?: Json
-          created_at?: string
-          updated_at?: string
-          created_by: string
-          status?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          category_id?: string | null
-          content?: string
-          fields?: Json
-          created_at?: string
-          updated_at?: string
-          created_by?: string
-          status?: string
-        }
-      }
-      generated_documents: {
-        Row: {
-          id: string
-          template_id: string
-          user_id: string
-          data: Json
-          created_at: string
-          status: string
-        }
-        Insert: {
-          id?: string
-          template_id: string
-          user_id: string
-          data?: Json
-          created_at?: string
-          status?: string
-        }
-        Update: {
-          id?: string
-          template_id?: string
-          user_id?: string
-          data?: Json
-          created_at?: string
-          status?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          role?: string
         }
       }
     }

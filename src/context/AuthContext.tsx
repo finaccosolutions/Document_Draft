@@ -1,16 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, AuthError } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { supabase, isUserAdmin } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
-  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,18 +28,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const checkAdminStatus = async (currentUser: User | null) => {
+    if (currentUser) {
+      const adminStatus = await isUserAdmin(currentUser);
+      setIsAdmin(adminStatus);
+    } else {
+      setIsAdmin(false);
+    }
+  };
+
   useEffect(() => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      setIsAdmin(session?.user?.user_metadata?.role === 'admin' ?? false);
+      checkAdminStatus(session?.user ?? null);
       setLoading(false);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
-      setIsAdmin(session?.user?.user_metadata?.role === 'admin' ?? false);
+      await checkAdminStatus(session?.user ?? null);
       setLoading(false);
     });
 
@@ -64,17 +73,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (name: string, email: string, password: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            name,
-            role: 'user',
-          },
-        },
       });
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+
+      // Create profile with default role
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: (await supabase.auth.getUser()).data.user?.id,
+            full_name: name,
+            role: 'user'
+          }
+        ]);
+      if (profileError) throw profileError;
     } finally {
       setLoading(false);
     }
@@ -85,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
@@ -117,12 +133,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{ 
         user, 
         loading, 
+        isAdmin,
         login, 
         register, 
         logout, 
         forgotPassword, 
         resetPassword,
-        isAdmin
       }}
     >
       {children}
