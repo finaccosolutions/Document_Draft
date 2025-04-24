@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, ChevronDown, FileText, User, LogIn, UserPlus } from 'lucide-react';
+import { Menu, X, ChevronDown, FileText, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showAccountMenu, setShowAccountMenu] = useState(false);
   const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -28,13 +27,9 @@ const Header: React.FC = () => {
   
   const textClass = scrolled || !isHomePage ? 'text-gray-800' : 'text-white';
   
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
@@ -49,88 +44,54 @@ const Header: React.FC = () => {
           </div>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex md:items-center md:space-x-8">
-            <Link 
-              to="/documents" 
-              className={`${textClass} hover:text-blue-600 transition-colors duration-200 font-medium`}
-            >
+          <nav className="hidden md:flex md:items-center md:space-x-6">
+            <Link to="/documents" className={`${textClass} hover:text-blue-600 transition-colors duration-200`}>
               Templates
             </Link>
-            <Link 
-              to="/#how-it-works" 
-              className={`${textClass} hover:text-blue-600 transition-colors duration-200 font-medium`}
-            >
+            <Link to="/#how-it-works" className={`${textClass} hover:text-blue-600 transition-colors duration-200`}>
               How It Works
             </Link>
             {isAdmin && (
-              <Link 
-                to="/admin" 
-                className={`${textClass} hover:text-blue-600 transition-colors duration-200 font-medium`}
-              >
+              <Link to="/admin" className={`${textClass} hover:text-blue-600 transition-colors duration-200`}>
                 Admin
               </Link>
             )}
-            
-            <div className="relative">
-              <button
-                className={`flex items-center ${textClass} hover:text-blue-600 transition-colors duration-200 font-medium focus:outline-none`}
-                onClick={() => setShowAccountMenu(!showAccountMenu)}
-              >
-                <span>Account</span>
-                <ChevronDown className="ml-1 h-4 w-4" />
-              </button>
-              
-              <div 
-                className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 transition-all duration-200 ${
-                  showAccountMenu ? 'opacity-100 visible transform translate-y-0' : 'opacity-0 invisible transform -translate-y-2'
-                }`}
-                onMouseLeave={() => setShowAccountMenu(false)}
-              >
-                {user ? (
-                  <>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                    >
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-2" />
-                        Profile
-                      </div>
+            {user ? (
+              <div className="relative group">
+                <button className={`flex items-center ${textClass} hover:text-blue-600 transition-colors duration-200`}>
+                  <span>{user.name}</span>
+                  <ChevronDown className="ml-1 h-4 w-4" />
+                </button>
+                <div className="absolute right-0 w-48 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden group-hover:block">
+                  <div className="py-1">
+                    <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Profile
                     </Link>
-                    <button
+                    <button 
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     >
-                      <div className="flex items-center">
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Sign out
-                      </div>
+                      Sign out
                     </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                    >
-                      <div className="flex items-center">
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Sign in
-                      </div>
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                    >
-                      <div className="flex items-center">
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Sign up
-                      </div>
-                    </Link>
-                  </>
-                )}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex space-x-4">
+                <Link 
+                  to="/login" 
+                  className={`${textClass} hover:text-blue-600 transition-colors duration-200`}
+                >
+                  Sign in
+                </Link>
+                <Link 
+                  to="/register" 
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
           </nav>
           
           {/* Mobile Navigation Toggle */}
@@ -146,89 +107,74 @@ const Header: React.FC = () => {
       </div>
       
       {/* Mobile Navigation Menu */}
-      <div 
-        className={`md:hidden fixed inset-0 z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="absolute inset-0 bg-black opacity-50" onClick={() => setIsOpen(false)}></div>
-        <div className="absolute inset-y-0 left-0 w-64 bg-white shadow-xl">
-          <div className="p-6">
-            <Link 
-              to="/" 
-              className="flex items-center mb-8"
-              onClick={() => setIsOpen(false)}
-            >
-              <FileText className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold">DocuGen</span>
-            </Link>
-            
-            <nav className="space-y-4">
-              <Link
-                to="/documents"
-                className="block text-gray-800 hover:text-blue-600 transition-colors duration-200"
+      {isOpen && (
+        <div className="md:hidden bg-white border-t border-gray-200">
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex flex-col space-y-3 py-3">
+              <Link 
+                to="/documents" 
+                className="text-gray-800 hover:text-blue-600 transition-colors duration-200"
                 onClick={() => setIsOpen(false)}
               >
                 Templates
               </Link>
-              <Link
-                to="/#how-it-works"
-                className="block text-gray-800 hover:text-blue-600 transition-colors duration-200"
+              <Link 
+                to="/#how-it-works" 
+                className="text-gray-800 hover:text-blue-600 transition-colors duration-200"
                 onClick={() => setIsOpen(false)}
               >
                 How It Works
               </Link>
               {isAdmin && (
-                <Link
-                  to="/admin"
-                  className="block text-gray-800 hover:text-blue-600 transition-colors duration-200"
+                <Link 
+                  to="/admin" 
+                  className="text-gray-800 hover:text-blue-600 transition-colors duration-200"
                   onClick={() => setIsOpen(false)}
                 >
                   Admin
                 </Link>
               )}
-              
               {user ? (
                 <>
-                  <Link
-                    to="/profile"
-                    className="block text-gray-800 hover:text-blue-600 transition-colors duration-200"
+                  <Link 
+                    to="/profile" 
+                    className="text-gray-800 hover:text-blue-600 transition-colors duration-200"
                     onClick={() => setIsOpen(false)}
                   >
                     Profile
                   </Link>
-                  <button
+                  <button 
                     onClick={() => {
                       handleLogout();
                       setIsOpen(false);
                     }}
-                    className="block text-gray-800 hover:text-blue-600 transition-colors duration-200"
+                    className="text-left text-gray-800 hover:text-blue-600 transition-colors duration-200"
                   >
                     Sign out
                   </button>
                 </>
               ) : (
                 <>
-                  <Link
-                    to="/login"
-                    className="block text-gray-800 hover:text-blue-600 transition-colors duration-200"
+                  <Link 
+                    to="/login" 
+                    className="text-gray-800 hover:text-blue-600 transition-colors duration-200"
                     onClick={() => setIsOpen(false)}
                   >
                     Sign in
                   </Link>
-                  <Link
-                    to="/register"
-                    className="block text-gray-800 hover:text-blue-600 transition-colors duration-200"
+                  <Link 
+                    to="/register" 
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 inline-block w-fit"
                     onClick={() => setIsOpen(false)}
                   >
                     Sign up
                   </Link>
                 </>
               )}
-            </nav>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 };
