@@ -32,14 +32,6 @@ export const isUserAdmin = async (user: any): Promise<boolean> => {
   }
 };
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
 export interface Database {
   public: {
     Tables: {
@@ -48,25 +40,25 @@ export interface Database {
           id: string
           full_name: string | null
           avatar_url: string | null
+          role: string
           created_at: string | null
           updated_at: string | null
-          role: string
         }
         Insert: {
           id: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: string
           created_at?: string | null
           updated_at?: string | null
-          role?: string
         }
         Update: {
           id?: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: string
           created_at?: string | null
           updated_at?: string | null
-          role?: string
         }
       }
     }
